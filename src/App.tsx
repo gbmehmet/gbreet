@@ -21,6 +21,10 @@ import {
 } from "@arbitrum/sdk/dist/lib/message/L1ToL2Message";
 import { ConnectButtons } from "./ConnectButtons";
 
+// Hack to make WalletConnect work: 
+// https://github.com/WalletConnect/walletconnect-monorepo/issues/748#issuecomment-1326425422
+window.Buffer = window.Buffer || require("buffer").Buffer;
+
 export enum ReceiptState {
   EMPTY,
   LOADING,

@@ -174,3 +174,16 @@ html {
   gap: var(--space-m);
   margin-top: var(--space-xl);
 }
+
+.wallet-connection-buttons {
+  text-align: center;
+}
+
+.wallet-connection-buttons button {
+  display: block;
+  margin: 0.5em auto;
+}
+
+.wallet-connection-buttons .error-message {
+  width: 100%;
+}

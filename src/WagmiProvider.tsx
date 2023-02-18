@@ -1,11 +1,13 @@
 import { WagmiConfig, createClient, configureChains } from "wagmi";
-import { mainnet, arbitrum, arbitrumGoerli, goerli } from "wagmi/chains";
+import { mainnet, goerli } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { PropsWithChildren } from "react";
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
 
-const { provider, webSocketProvider } = configureChains(
-  [mainnet, goerli, arbitrum, arbitrumGoerli],
+const { chains, provider, webSocketProvider } = configureChains(
+  [mainnet, goerli],
   [
     publicProvider(),
     jsonRpcProvider({
@@ -16,6 +18,15 @@ const { provider, webSocketProvider } = configureChains(
 
 const client = createClient({
   autoConnect: true,
+  connectors: [
+    new MetaMaskConnector({ chains }),
+    new WalletConnectConnector({
+      chains,
+      options: {
+        qrcode: true,
+      },
+    }),
+  ],
   provider,
   webSocketProvider
 });
