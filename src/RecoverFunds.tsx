@@ -92,10 +92,11 @@ function RecoverFunds({
             // And we send the request through the method unsafeCreateRetryableTicket of the Inbox contract
             // We need this method because we don't want the contract to check that we are not sending the l2CallValue
             // in the "value" of the transaction, because we want to use the amount that is already on L2
+            const l2CallValue = balanceToRecover.sub(gasEstimation.maxSubmissionCost).sub(gasEstimation.gasLimit.mul(gasEstimation.maxFeePerGas));
             try {
               const l1SubmissionTxRaw = await inbox.connect(signer).unsafeCreateRetryableTicket(
                 destinationAddress,                // to
-                balanceToRecover,                  // l2CallValue
+                l2CallValue,                       // l2CallValue
                 gasEstimation.maxSubmissionCost,   // maxSubmissionCost
                 destinationAddress,                // excessFeeRefundAddress
                 destinationAddress,                // callValueRefundAddress
@@ -104,7 +105,7 @@ function RecoverFunds({
                 "0x",                              // data
                 {
                     from: signerAddress.value,
-                    value: gasEstimation.gasLimit.mul(gasEstimation.maxFeePerGas).add(gasEstimation.maxSubmissionCost)
+                    value: 0,
                 }
               );
 
