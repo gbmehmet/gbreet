@@ -1,6 +1,6 @@
 {
   "name": "arbitrum-funds-recovery-tool",
-  "description": "Set of tools to try out different Arbitrum functionalities",
+  "description": "Tool to recover funds that are stuck on an L2 aliased address",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
