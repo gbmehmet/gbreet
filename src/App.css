@@ -149,6 +149,11 @@ html {
   width: 500px;
 }
 
+.recover-funds-form .loading-block {
+  display: none;
+  margin-top: 1em;
+}
+
 .recover-funds-form button {
   display: block;
   margin: 1em auto 0;
@@ -163,6 +168,10 @@ html {
   padding: 1em;
   background-color: silver;
   color: black;
+}
+.redeemtext,
+.recoverfundstext a {
+  color: var(--blue-dark);
 }
 
 .buttons-wrapper {

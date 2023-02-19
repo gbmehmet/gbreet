@@ -35,7 +35,9 @@ function RecoverFunds({
           className="input-style"
           id="destination-address"
         />
+        <div className="loading-block" id="loading-block">Sending transaction...</div>
         <button
+          id="recover-button"
           onClick={async () => {
             setMessage("");
             const destinationAddressInput = document.getElementById("destination-address") as HTMLInputElement;
@@ -47,6 +49,10 @@ function RecoverFunds({
               setMessage(`Please input a valid destination address`);
               return;
             }
+
+            // Hide button and show loading effect
+            (document.getElementById("loading-block") as HTMLDivElement).style.display = "block";
+            (document.getElementById("recover-button") as HTMLButtonElement).style.display = "none";
             
             // Start transaction
             const signerAddress = new Address(await signer.getAddress());
@@ -86,25 +92,36 @@ function RecoverFunds({
             // And we send the request through the method unsafeCreateRetryableTicket of the Inbox contract
             // We need this method because we don't want the contract to check that we are not sending the l2CallValue
             // in the "value" of the transaction, because we want to use the amount that is already on L2
-            const l1SubmissionTxRaw = await inbox.connect(signer).unsafeCreateRetryableTicket(
-              destinationAddress,                // to
-              balanceToRecover,                  // l2CallValue
-              gasEstimation.maxSubmissionCost,   // maxSubmissionCost
-              destinationAddress,                // excessFeeRefundAddress
-              destinationAddress,                // callValueRefundAddress
-              gasEstimation.gasLimit,            // maxLimit
-              gasEstimation.maxFeePerGas,        // maxFeePerGas
-              "0x",                              // data
-              {
-                  from: signerAddress.value,
-                  value: gasEstimation.gasLimit.mul(gasEstimation.maxFeePerGas).add(gasEstimation.maxSubmissionCost)
-              }
-            );
+            try {
+              const l1SubmissionTxRaw = await inbox.connect(signer).unsafeCreateRetryableTicket(
+                destinationAddress,                // to
+                balanceToRecover,                  // l2CallValue
+                gasEstimation.maxSubmissionCost,   // maxSubmissionCost
+                destinationAddress,                // excessFeeRefundAddress
+                destinationAddress,                // callValueRefundAddress
+                gasEstimation.gasLimit,            // maxLimit
+                gasEstimation.maxFeePerGas,        // maxFeePerGas
+                "0x",                              // data
+                {
+                    from: signerAddress.value,
+                    value: gasEstimation.gasLimit.mul(gasEstimation.maxFeePerGas).add(gasEstimation.maxSubmissionCost)
+                }
+              );
 
-            // We wrap the transaction in monkeyPatchContractCallWait so we can also waitForL2 later on
-            const l1SubmissionTx = L1TransactionReceipt.monkeyPatchContractCallWait(l1SubmissionTxRaw);
-            const l1SubmissionTxReceipt = await l1SubmissionTx.wait();
-            setMessage(`L1 submission transaction receipt is: ${l1SubmissionTxReceipt.transactionHash}. Follow the transaction in the Retryables Dashboard.`);
+              // We wrap the transaction in monkeyPatchContractCallWait so we can also waitForL2 later on
+              const l1SubmissionTx = L1TransactionReceipt.monkeyPatchContractCallWait(l1SubmissionTxRaw);
+              const l1SubmissionTxReceipt = await l1SubmissionTx.wait();
+              
+              // Hide loading effect and show final message
+              (document.getElementById("loading-block") as HTMLDivElement).style.display = "none";
+              setMessage(`L1 submission transaction receipt is: ${l1SubmissionTxReceipt.transactionHash}. Follow the transaction in the <a target="_blank" href="https://retryable-dashboard.arbitrum.io/tx/${l1SubmissionTxReceipt.transactionHash}">Retryables Dashboard</a>.`);
+            } catch (err: any) {
+              console.log(err);
+
+              // Show button and hide loading effect
+              (document.getElementById("loading-block") as HTMLDivElement).style.display = "none";
+              (document.getElementById("recover-button") as HTMLButtonElement).style.display = "block";
+            }
           }}
         >
           Recover
@@ -117,7 +134,7 @@ function RecoverFunds({
     <>
       {redeemButton}
       <div>
-        {message && <div className="recoverfundstext">{message}</div>}
+        {message && <div className="recoverfundstext" dangerouslySetInnerHTML={{ __html: message}} />}
       </div>
     </>
   );
